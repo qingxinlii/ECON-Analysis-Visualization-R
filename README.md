@@ -24,6 +24,8 @@ rProjects:
 
       2. DataVisual: CO2 emission (per-capita) & GDP (per-capita) Comparison between Germany & Spain 2000-2020
       
+      3. DataVisual: Vancouver Crime Analysis (https://github.com/qingxinlii/ECON-Analysis-Visualization-R-/blob/634526d89649439a87f5b1a2618d4c19fb7a2e97/DataVisualization_Vancouver%20Crime%20on%20October%205th%202021.Rmd)
+      
       
 
 Skills:   (These rProjects is intended to show my ability to complete work.)

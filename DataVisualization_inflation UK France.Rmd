@@ -1,0 +1,50 @@
+---
+title: "DataVisual: Inflation Comparison between UK and France 1970-2020"
+author: "Cici Li"
+date: 2023-06-07
+output: html_document
+source: WDI: World Development Indicators (World Bank)
+---
+
+```{r, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(socviz)
+library(gapminder)
+library(WDI)
+```
+
+## DataVisual: Inflation Comparison between UK and France 1970-2020
+
+```{r}
+data_edu <- WDI(
+  country = c("GB","FR"),
+  indicator = c('inflation' = 'FP.CPI.TOTL.ZG'),
+  start = 1970,
+  end = 2022,
+)
+# data_edu
+
+#Writing: I have loaded data about UK and France's Inflation, consumer prices (annual %) from 1970 to 2020. I chose this data because I want to see if the Covid-19 Pendemic had brought any impact on inflation in these two regions.
+
+
+pe <- ggplot(data=data_edu,
+            mapping = aes(x = year,
+                          y = inflation,
+                          color = country)
+)
+pe + geom_line() + 
+    labs(x = "Year",
+       y = "Inflation, consumer prices (annual %)",
+       title = "United Kindom and France's Inflation, consumer prices (annual %) 1970-2020",
+       caption = "Source: World Bank WDI")
+
+```
+
+##### Writing:
+
+I have learned that for the large peak at 1975 was due to various factors in the economy such as the oil price rise, the war in Vietnam, and etc. After that the trend dramatically lowered and is very constant around a range between 0% to 4%. This is mainly due to the aggrement among many countries for making the inflation at a targeted rate. Recently due to the recovery of economy from the pendemic, the inflation had been once again rising dramaticaly, but still within the targeted range of inflation.
+
+
+
+

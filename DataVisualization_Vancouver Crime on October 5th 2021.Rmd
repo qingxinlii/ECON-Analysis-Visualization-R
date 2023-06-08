@@ -116,14 +116,14 @@ crime_2 <- crimedata %>%
 
 
 p <- ggplot(data = crime_2, aes(x = YEAR, y = crime_count, color = TYPE))
-p + geom_point()+ 
-  theme_bw() + 
-  labs(title = "Total yearly crime numbers from 2011 to 2020 in Vancouver", 
-       subtitle = "Consider two crime types: Mischief, Offence against a person", 
-       caption = "Source: Vancouver Police Department",
-       x = "Year",
-       y = "Crime count",
-       color = "Types of Crime")
+# p + geom_point()+ 
+#   theme_bw() + 
+#   labs(title = "Total yearly crime numbers from 2011 to 2020 in Vancouver", 
+#        subtitle = "Consider two crime types: Mischief, Offence against a person", 
+#        caption = "Source: Vancouver Police Department",
+#        x = "Year",
+#        y = "Crime count",
+#        color = "Types of Crime")
 
 p_crime_2 <- p + geom_point()+ 
   scale_x_continuous(breaks = c(2011, 2014, 2017, 2020))+

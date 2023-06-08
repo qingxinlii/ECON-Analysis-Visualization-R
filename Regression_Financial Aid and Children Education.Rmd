@@ -1,0 +1,233 @@
+---
+title: "Regression: the effectiveness of financial aid on Children's school attendance "
+author: "Cici Li"
+date: 2023-06-07
+output: html_document
+source: "Paper: Benhassine et al (2015)"
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r}
+library(tidyverse)
+library(readxl)
+```
+
+# This project analyzes the effectiveness of financial aid granted to parents and on the child's school attendance/dropout rate.
+
+* The data is retrieved from a randomized experiment of Simple Random Sampling.
+* 0Control Group: no financial aid 
+* 1Treatment_Unconditional transfer & Father: Financial aid is given to the father, where no restriction is imposed for how to use this money
+* 2Treatment_Unconditional transfer & Mother: Financial aid is given to the mother, where no restriction is imposed for how to use this money
+* 3Treatment_conditional transfer & Father: Financial aid is given to the father, where this money can be only used for financing the child's education
+* 4Treatment_conditional transfer & Mother: Financial aid is given to the mother, where this money can be only used for financing the child's education
+
+```{r}
+data <- read_excel("a2_school_visits.xls")
+
+# data
+
+a <- data %>% 
+  mutate(treatment = if_else(group == 0 , 0, NaN),
+         treatment = if_else(group == 1 & benef == 'Father' , 1, treatment),
+         treatment = if_else(group == 1 & benef == 'Mother' , 2, treatment),
+         treatment = if_else(group == 2 & benef == 'Father' , 3, treatment),
+         treatment = if_else(group == 2 & benef == 'Mother' , 4, treatment))
+
+a <- a %>%
+  relocate(treatment)
+
+
+
+ss1 <- a %>%
+  group_by(treatment) %>%
+  summarise(NUM_stu_per_group = n())
+ss1
+
+```
+
+At Baseline, students enrolled in grades 1-4:
+* 0Control Group: there are 6880 students.
+* 1Treatment_Unconditional transfer & Father: there are 4598  students.
+* 2Treatment_Unconditional transfer & Mother: there are 4363  students.
+* 3Treatment_conditional transfer & Father: there are 9896  students.
+* 4Treatment_conditional transfer & Mother: there are 10024  students.
+
+
+
+
+Learned: `4 * TRUE` results = 4
+
+```{r}
+#if dropout, 1
+#else 0
+
+b <- a %>%
+  mutate(ifDrop = ifelse( ( (v1_status =="2 dropped out" & !is.na(v1_status)) | 
+                            (v2_status =="2 dropped out" & !is.na(v2_status)) | 
+                            (v3_status =="2 dropped out" & !is.na(v3_status)) |
+                            (v4_status =="2 dropped out" & !is.na(v4_status)) | 
+                            (v5_status =="2 dropped out" & !is.na(v5_status)) | 
+                            (v6_status =="2 dropped out" & !is.na(v6_status)) ) &
+                            
+                            ((!(v6_status =="1 enrolled") & !(v6_status =="8 Primary school completed")) & !is.na(v6_status) ),
+                          1,
+                          0
+                        ))
+b   
+           
+
+# # Meathod 1 (correct):
+# ss2 <- b %>%
+#   group_by(treatment) %>%
+#   summarise(NUM_drop_per_group = sum(ifDrop)) 
+# ss2
+# 
+# ss <- left_join(ss1, ss2, by = 'treatment')
+# 
+# ss %>%
+#   group_by(treatment) %>%
+#   summarise(Prop_drop_per_group = NUM_drop_per_group/NUM_stu_per_group)
+
+# Meathod 2 (correct):
+ss2 <- b %>%
+  group_by(treatment) %>%
+  summarise(NUM_drop_per_group = mean(ifDrop, na.rm = TRUE)) # calculates the average / proportion
+ss2
+
+```
+
+Proportion of Drop Outs per group:
+
+* 0Control Group: there are 6.0% Drop Outs
+* 1Treatment_Unconditional transfer & Father: there are 3.1%  Drop Outs
+* 2Treatment_Unconditional transfer & Mother: there are 2.6%  Drop Outs
+* 3Treatment_conditional transfer & Father: there are 2.8%  Drop Outs
+* 4Treatment_conditional transfer & Mother: there are 2.0%  Drop Outs
+
+
+Student dropout rate is less if the cash transfer is conditional (treatment group 1, 2), which means students were required to attend school, than if the cash transfer is unconditional (treatment group 3, 4), which means students were not required to attend school. Thus it is more efficient to provide conditional cash transfer, in order to have less student dropout rate. This might be because research participants that are required to report their schooling attendance will be more likely to attend school to receive the extra cash transfer.
+
+
+Student dropout rate is less if the cash transfer is given to mother (treatment group 2, 4), than if the cash transfer is given to father (treatment group 1, 3). Thus it is more efficient to provide cash transfer to the mother, in order to have less student dropout rate. This might be because for mother tend to pay more attention on student education and father pay less attention of student education.
+
+
+
+
+# Causal Effect 
+
+* measures if x changes by one unit , there is xx the marginal effect on Y.
+
+This causal effect measures if x changes from treatment 0 to 1, the  effect on Y is XX more/less than the dummi variable: treatment==0
+
+```{r}
+
+t.test(b$ifDrop[b$treatment==1],b$ifDrop[b$treatment==0])
+
+reg1 <- lm(ifDrop ~ treatment==1, b[b$treatment==0 | b$treatment==1,])
+summary(reg1)
+```
+
+The causal effect on student dropout rate from treatment group 1 is 2.26% less than than that from the control group. The standard deviation is 0.004.
+
+
+```{r}
+t.test(b$ifDrop[b$treatment==2],b$ifDrop[b$treatment==0])
+
+reg2 <- lm(ifDrop ~ treatment==2, b[b$treatment==0 | b$treatment==2,])
+summary(reg2)
+```
+
+The causal effect on student dropout rate from treatment group 2 is 3.08% less than than that from the control group. The standard deviation is 0.004.
+
+```{r}
+t.test(b$ifDrop[b$treatment==3],b$ifDrop[b$treatment==0])
+
+reg3 <- lm(ifDrop ~ treatment==3, b[b$treatment==0 | b$treatment==3,])
+summary(reg3)
+```
+
+The causal effect on student dropout rate from treatment group 3 is 2.90% less than than that from the control group. The standard deviation is 0.003.
+
+```{r}
+t.test(b$ifDrop[b$treatment==4],b$ifDrop[b$treatment==0])
+
+reg4 <- lm(ifDrop ~ treatment==4, b[b$treatment==0 | b$treatment==4,])
+summary(reg4)
+```
+
+The causal effect on student dropout rate from treatment group 4 is 3.62% less than than that from the control group. The standard deviation is 0.003.
+
+
+##### Conclusion: The average dropout rate is much lower if the financial aid is given to the mother.
+
+
+# Hypothesis tesing: t test & p-value
+
+```{r}
+t.test(b$ifDrop[b$treatment==1],b$ifDrop[b$treatment==0])
+```
+since p-value is less than 0.05 we reject the null that the causal effect of treatment (ATT): 'the treatment group means equal the control group mean' at the 5% level of significance.
+
+
+```{r}
+t.test(b$ifDrop[b$treatment==2],b$ifDrop[b$treatment==0])
+```
+since  p-value is less than 0.05 we reject the null that the causal effect of treatment (ATT): 'the treatment group means equal the control group mean' at the 5% level of significance.
+
+
+```{r}
+t.test(b$ifDrop[b$treatment==3],b$ifDrop[b$treatment==0])
+```
+since p-value  is less than 0.05 we  reject the null that the causal effect of treatment (ATT): 'the treatment group means equal the control group mean' at the 5% level of significance.
+
+
+```{r}
+t.test(b$ifDrop[b$treatment==4],b$ifDrop[b$treatment==0])
+```
+since p-value  is less than 0.05 we reject the null that the causal effect of treatment (ATT): 'the treatment group means equal the control group mean' at the 5% level of significance.
+
+
+
+
+# Compare the Dropout rate by the students' gender
+
+```{r}
+ss3 <- b %>%
+  group_by(b_gender) %>%
+  summarise(NUM_drop_per_group = mean(ifDrop, na.rm = TRUE)) # calculates the average / proportion
+ss3
+```
+
+* For girls, the dropout rate is 3.22 % out of all students.
+* For boys, the dropout rate is 3.13 % out of all students.
+* For other genders, the dropout rate is 3.06 % out of all students.
+
+Student dropout rate is roughly the same for any gender. Girls have slightly higher dropout rate than boys. This is probably because poor families worth boy's education more than girl's education.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

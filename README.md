@@ -27,6 +27,9 @@ rProjects:
       3. [Vancouver Crime Analysis](https://github.com/qingxinlii/ECON-Analysis-Visualization-R-/blob/634526d89649439a87f5b1a2618d4c19fb7a2e97/DataVisualization_Vancouver%20Crime%20on%20October%205th%202021.Rmd)
       
       
+      
+      DataVisualization_inflation UK France.Rmd
+      
 
 Skills:   (These rProjects is intended to show my ability to complete work.)
          

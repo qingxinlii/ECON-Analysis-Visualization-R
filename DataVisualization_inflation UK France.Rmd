@@ -3,8 +3,11 @@ title: "DataVisual: Inflation Comparison between UK and France 1970-2020"
 author: "Cici Li"
 date: 2023-06-07
 output: html_document
-source: WDI: World Development Indicators (World Bank)
+source: WDI_ World Development Indicators (World Bank)
 ---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
 
 ```{r, include=FALSE}
 library(tidyverse)
@@ -14,7 +17,6 @@ library(gapminder)
 library(WDI)
 ```
 
-## DataVisual: Inflation Comparison between UK and France 1970-2020
 
 ```{r}
 data_edu <- WDI(

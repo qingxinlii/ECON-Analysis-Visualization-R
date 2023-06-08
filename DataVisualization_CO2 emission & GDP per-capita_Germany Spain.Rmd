@@ -3,8 +3,11 @@ title: "DataVisual: CO2 emission & GDP (per-capita) Comparison between Germany a
 author: "Cici Li"
 date: 2023-06-07
 output: html_document
-source: WDI: World Development Indicators (World Bank)
+source: WDI_ World Development Indicators (World Bank)
 ---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
 
 ```{r, include=FALSE}
 library(tidyverse)
@@ -14,7 +17,6 @@ library(gapminder)
 library(WDI)
 ```
 
-## DataVisual: CO2 emission & GDP (per-capita) Comparison between Germany and Spain 2000-2020
 
 
 ```{r}

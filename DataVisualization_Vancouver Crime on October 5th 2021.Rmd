@@ -1,0 +1,146 @@
+---
+title: "DataVisual: CO2 emission & GDP (per-capita) Comparison between Germany and Spain 2000-2020"
+author: "Cici Li"
+date: 2023-06-07
+output: html_document
+source: WDI_ World Development Indicators (World Bank)
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r, include=FALSE}
+library(tidyverse)
+library(lubridate)
+library(scales)
+```
+
+```{r}
+load("crimedata_20221001.Rda")
+# view(crimedata)
+```
+
+## Description:
+
+This data is from Vancouver Police Department. Each row represents a specific crime case happened in a particular neighborhood in Vancouver on a particular day in the past. The column contains variables such as the type of crime, year, month, day, the name of the neighborhood, and etc. The data splits the type of crime into many categories such as 'theft from vehicle', 'theft of vehicle', 'Offence Against a Person', 'Other Theft', and etc. The category for 'Other Theft' include any other kinds of thefts or crime of personal properties of value.
+
+
+```{r}
+crime_Birthday <- crimedata %>%
+  filter(YEAR == 2021, MONTH == 10, DAY == 5)
+# view(crime_Birthday)
+```
+
+* On October 5th, 2021, there were 86 crime incidents.
+
+
+
+## Figure 1:
+
+```{r}
+plot_data <- crime_Birthday %>%
+  group_by(TYPE) %>%
+  summarize(crime_count = n())
+# plot_data
+```
+
+## What type of crime was most common on October 5th, 2021? 
+
+```{r}
+library(ggplot2)
+p <- ggplot(plot_data, mapping = aes(y = crime_count, x = reorder(TYPE, crime_count)))
+
+p_CrimeCount <- p + geom_col() + coord_flip() +
+  theme_bw() + 
+  labs(title = "Total number of crimes for each crime category in Vancouver", 
+       subtitle = "The data is on October 5, 2021", 
+       caption = "Source: Vancouver Police Department",
+       x = "Types of crime",
+       y = "Crime count")
+
+print(p_CrimeCount)
+```
+
+On October 5th, 2021, the most common type of crime fell into the 'Other Theft' category, which includes a range of property thefts. The second most common type of crime was the theft from vehicle. The least common type of crime was the theft of vehicles.
+
+#### The day on October 5th, 2021 was on a `wday(ymd(paste( 2021, 10, 5, sep = "-")), label = TRUE, abbr = FALSE)` = `r wday(ymd(paste( 2021, 10, 5, sep = "-")), label = TRUE, abbr = FALSE)`.
+
+This type of crime was most common on October 5th, 2021, might be due to the fact that October 5th, 2021 was on a Tuesday. It might be common that in 2021, that the thefts of other types is the highest on a Tuesday.
+
+
+## Figure 2: Determine which NEIGHBOURHOOD had the greatest number of crimes on October 5th, 2021. 
+
+```{r}
+crime_neighbourhood_count <- crime_Birthday %>%
+  group_by(NEIGHBOURHOOD) %>%
+  summarize(crime_count = n())
+
+crime_NBgreatest = arrange(crime_neighbourhood_count,desc(crime_count))[1,]
+```
+
+On October 5th, 2021, the neighborhood with the greatest number of crimes is '`arrange(crime_neighbourhood_count,desc(crime_count))[1,]$NEIGHBOURHOOD` = `r arrange(crime_neighbourhood_count,desc(crime_count))[1,]$NEIGHBOURHOOD`'.
+
+```{r}
+crime_NBgreatest_typeCount <- crime_Birthday %>%
+  filter(NEIGHBOURHOOD == crime_NBgreatest$NEIGHBOURHOOD) %>%
+  group_by(TYPE) %>%
+  summarize(crime_count = n())
+crime_NBgreatest_typeCount
+
+p <- ggplot(crime_NBgreatest_typeCount, mapping = aes(x = crime_count, y = reorder(TYPE, crime_count)))
+
+p_CrimeCount <- p + geom_col()+
+  theme_bw() + 
+  labs(title = "Total crime numbers for each category on October 5th, 2021", 
+       subtitle = "The neighborhood of greatest crime number: Central Business District", 
+       caption = "Source: Vancouver Police Department",
+       y = "Types of crime",
+       x = "Crime count")
+
+print(p_CrimeCount)
+```
+
+#### Does the pattern of crimes in that neighbourhood look similar to the city overall?
+Yes, the overall patter looks very similar to the city. Both graph have the category 'other theft' as the most common type of thefts, and 'theft from vehicle' as the second most common type of thefts. However, the thefts in this '`r arrange(crime_neighbourhood_count,desc(crime_count))[1,]$NEIGHBOURHOOD`' neighborhood contain fewer categories of crime than that from the city of Vancouver. For example, it did not have crime of 'thefts of vehicle' and etc.
+
+
+## Figure 3: Showing the annual trends in those two types of crimes over the 10 year period.
+
+```{r}
+crime_2 <- crimedata %>%
+  filter(TYPE == c('Mischief', 'Offence Against a Person'), YEAR >=2011, YEAR <2021) %>%
+  group_by(YEAR, TYPE) %>%
+  summarize(crime_count = n())
+# crime_2
+
+
+p <- ggplot(data = crime_2, aes(x = YEAR, y = crime_count, color = TYPE))
+p + geom_point()+ 
+  theme_bw() + 
+  labs(title = "Total yearly crime numbers from 2011 to 2020 in Vancouver", 
+       subtitle = "Consider two crime types: Mischief, Offence against a person", 
+       caption = "Source: Vancouver Police Department",
+       x = "Year",
+       y = "Crime count",
+       color = "Types of Crime")
+
+p_crime_2 <- p + geom_point()+ 
+  scale_x_continuous(breaks = c(2011, 2014, 2017, 2020))+
+  theme_bw() + 
+  labs(title = "Total yearly crime numbers from 2011 to 2020 in Vancouver", 
+       subtitle = "Consider two crime types: Mischief, Offence against a person", 
+       caption = "Source: Vancouver Police Department",
+       x = "Year",
+       y = "Crime count",
+       color = "Types of Crime")
+
+p_crime_2
+```
+
+#### Patterns in the graph: 
+
+From the graph we can see that the number of crime of either 'mischief' or 'offence against a person' rose since 2017. Especially after 2019, crime number increased once again. 
+It is surprising that the 'offence against a person' was constantly low from 2014 to 2018. It is also surprising to see that between 2013 to 2016, the number of 'offence against a person decreased dramatically, however, the number of 'mischief' was still constant on a yearly account of around 2125 cases.
+It is also notable that the number of 'offence against a person' is always lower than the number of 'mischief'. 
+

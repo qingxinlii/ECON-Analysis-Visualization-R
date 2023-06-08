@@ -1,0 +1,161 @@
+---
+title: "Regression: Stock/Security Performance Analysis"
+author: "Cici Li"
+date: 2023-06-07
+output: html_document
+source: Toronto Stock Exchange
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+```{r, message = FALSE, warning = FALSE}
+library(tidyverse)
+library(lubridate)
+library(modelr)
+library(dplyr)
+library(vtable)
+library(broom)
+```
+
+```{r}
+all_csv <- c("BCE.csv","BLDP.csv","FTS.csv","RCI.csv","RY.csv",
+           "TRP.csv","XBB.csv","TSX.csv","T90.csv")
+
+list_data_all <- list()
+# list_data_all
+
+for(i in all_csv){
+  #print(i)
+  list_data_all[[i]] <- read_csv(i)
+}
+
+list_begin <- list()
+#list_begin
+
+for(i in all_csv){
+    list_begin[i] <- list_data_all[[i]][1,1]
+    print(list_begin[i])
+}
+```
+
+* No, not all of the .csv files cover the same time period.
+* T90.csv and TSX.csv begin earliest：1985-01-01
+* BCE.csv begin latest：1996-06-01
+
+
+```{r}
+data_all <- list_data_all[[9]]
+
+for(i in 8:1){
+  data_all <- data_all %>% full_join(list_data_all[[i]], by = "Date")
+}
+
+# data_all
+
+data_filtered <- filter(data_all, Date <= "2021-12-31", Date >= "2001-01-01")
+
+# data_filtered
+
+sumtable(data_filtered)
+```
+
+Which security has the highest average monthly return in these data? Which has the lowest?
+
+* FTS security has the **highest** (1.167) "average monthly return" in these data.
+* XBB security has the **lowest** (0.373) "average monthly return" in these data.
+
+Which security has the most volatile monthly returns (i.e., the highest standard deviation)? Which has the lowest?
+
+* BLDP security has the most volatile (high risk) monthly returns (the highest standard deviation: 19.102)
+* XBB security has the least volatile (low risk) monthly returns (the lowest standard deviation: 1.406)
+
+
+# The excess return for each security and the TSX Composite Index
+
+* The term “excess returns” is used to denote how a fund has performed compared to a benchmark.
+```{r}
+data_excess <- data_filtered
+
+list_i <- c("BCE","BLDP","FTS","RCI","RY", "TRP", "XBB","TSX")
+for(i in list_i){
+   data_excess[[i]] <- data_filtered[[i]] - data_filtered$T90
+}
+
+data_excess
+```
+
+```{r, eval = FALSE, include = FALSE}
+data_filtered[["T90"]]
+
+data_filtered$T90
+```
+
+# The annualized Sharpe Ratio for each security 
+
+* The Sharpe ratio divides a portfolio's excess returns by a measure of its volatility to assess risk-adjusted performance
+```{r}
+func_yr_sharp_ratio <- function(i){
+  12^0.5*mean(data_excess[[i]])/sd(data_excess[[i]])
+}
+
+list_yr_sharp_ratio <- c()
+for(i in list_i[-length(list_i)]){
+  # print(i)
+  list_yr_sharp_ratio[i] <- func_yr_sharp_ratio(i)
+  # print(list_yr_sharp_ratio[i])
+}
+
+list_yr_sharp_ratio
+```
+```{r, eval = FALSE, include = FALSE}
+length(list_i)
+list_i[-length(list_i)]
+list_i
+list_security_name <- list_i[-length(list_i)]
+list_security_name
+```
+
+* FTS security has the highest risk-adjusted return: 0.81
+    * the security has the highest average return & low volatility (risk)
+    * good for investor
+* BLDP security has the lowest risk-adjusted return: 0.16
+    * the security has low average return & the highest volatility (risk)
+    * not good for investor
+
+
+```{r}
+CAPM_reg <- function(security_i){
+  reg_linear <- lm(data_excess[[security_i]] ~ data_excess[["TSX"]], data = data_excess)
+  summary_reg <- summary(reg_linear)
+  # print(reg_linear)
+  print(summary(reg_linear))
+  
+  
+  print(paste0("Conclusion: As the Excess Return of TSX increase by 1%, the Excess Return of ", security_i, " changes by ", coef(reg_linear)[2], "%."))
+  
+  ggplot(data = data_excess, aes(x = data_excess[["TSX"]], y = data_excess[[security_i]])) +
+    geom_point(alpha = 0.5) +
+    geom_smooth(method = "lm", se = FALSE) +
+    geom_text(x = min(data_excess[["TSX"]]) + (max(data_excess[["TSX"]]) - min(data_excess[["TSX"]])) / 8,
+              y = max(data_excess[[security_i]]),
+              label = paste0('alpha =', coef(reg_linear)[1])) +
+    geom_text(x = min(data_excess[["TSX"]]) + (max(data_excess[["TSX"]]) - min(data_excess[["TSX"]])) / 8,
+              y = max(data_excess[[security_i]]) - (max(data_excess[[security_i]]) - min(data_excess[[security_i]])) / 20,
+              label = paste0("beta =", coef(reg_linear)[2])) +
+    geom_text(x = min(data_excess[["TSX"]]) + (max(data_excess[["TSX"]]) - min(data_excess[["TSX"]])) / 8,
+              y = max(data_excess[[security_i]]) - (max(data_excess[[security_i]]) - min(data_excess[[security_i]])) / 10,
+              label = paste0("R^2=", summary_reg$r.squared)) +
+    labs(x = "Excess return of market (retrieved from TSX) in a month",
+         y = paste0("Excess return of ", security_i, " in a month"),
+         title = paste0("The CAPM regression & scatter plot for ", security_i, " and TSX"),
+         subtitle = "This is from 2001 to 2021.")
+  
+}
+
+for(i in list_i[-length(list_i)]){
+  print(CAPM_reg(i))
+}
+```
+

@@ -48,6 +48,8 @@ Skills:   (These rProjects is intended to show my ability to complete work.)
                         * Multi-Linear Regression
                         
                         * Difference in difference 
+                        
+                        * Regression Discontinuity 
                
                * do statistical analysis with summary statistics:
                         

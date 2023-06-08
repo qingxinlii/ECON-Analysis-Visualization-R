@@ -26,9 +26,7 @@ rProjects:
       
       
 
-Skills:
-
-   These rProjects shows my ability to complete work requiring:
+Skills:   (These rProjects is intended to show my ability to complete work.)
          
          * data tidying:  clean large amount of messy data inputs --> into a file of organized variables and observations
          

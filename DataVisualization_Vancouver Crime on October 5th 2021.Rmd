@@ -1,9 +1,9 @@
 ---
-title: "DataVisual: CO2 emission & GDP (per-capita) Comparison between Germany and Spain 2000-2020"
+title: "DataVisual: Vancouver Crime Analysis"
 author: "Cici Li"
 date: 2023-06-07
 output: html_document
-source: WDI_ World Development Indicators (World Bank)
+source: Vancouver Police Department
 ---
 
 ```{r setup, include=FALSE}

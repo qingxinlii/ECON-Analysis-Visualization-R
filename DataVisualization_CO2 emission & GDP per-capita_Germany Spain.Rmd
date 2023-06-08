@@ -1,0 +1,66 @@
+---
+title: "DataVisual: CO2 emission & GDP (per-capita) Comparison between Germany and Spain 2000-2020"
+author: "Cici Li"
+date: 2023-06-07
+output: html_document
+source: WDI: World Development Indicators (World Bank)
+---
+
+```{r, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(socviz)
+library(gapminder)
+library(WDI)
+```
+
+## DataVisual: CO2 emission & GDP (per-capita) Comparison between Germany and Spain 2000-2020
+
+
+```{r}
+dat <- WDI(
+  country = c("DE","ES"),
+  indicator = c('percap_GDP' = 'NY.GDP.PCAP.KD',
+                'percap_CO2_emissions' = 'EN.ATM.CO2E.PC'), 
+  start = 2000,
+  end = 2020
+  )
+
+# dat
+
+# now a simple X-Y scatter plot of GDP per capita 
+# against the overall unemployment rate  
+p <- ggplot(data=dat,
+            mapping = aes(x = year, 
+                          y = percap_CO2_emissions,
+                          color = country,
+                          size = percap_GDP)
+            )
+
+
+p + geom_point(alpha = 0.7) + geom_smooth() +
+    labs(x = "Year 2000-2020",
+       y = "CO2 emission per capita",
+       title = "Germany and Spain's CO2 emission per capita 2000-2020",
+       caption = "Source: World Bank WDI")
+
+```
+
+##### Writing: 
+
+Since 2000, Germany's CO2 emission per capita was decreading constantly. Especially since 2015 the CO2 emission per capita had been decreasing at an increasing rate. This might be due to Germany's claim for the 65% of CO2 emission reduction by 2030.
+
+Since 2000 to 2005, Spain's CO2 emission per capita had been increasing  largely, but after that it had been decreasing largely as well. Due to especially the COVID-19 pendemic, Spain's CO₂ emissions dropped slightly as a result of the COVID-19 pandemic. However after economic is having a recovery from the pendemic, Spain's CO2 emission per capita had a slightly trend of increasing their CO2 emission per capita significantly.
+
+
+
+
+
+
+
+
+
+
+
+
+

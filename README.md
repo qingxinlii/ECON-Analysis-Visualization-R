@@ -20,7 +20,7 @@ In each analysis, it includes:
 
 rProjects:
 
-      1. [Inflation Comparison between UK and France 1970-2020](https://github.com/qingxinlii/ECON-Analysis-Visualization-R-/blob/634526d89649439a87f5b1a2618d4c19fb7a2e97/DataVisualization_CO2%20emission%20%26%20GDP%20per-capita_Germany%20Spain.Rmd)
+      1. [Inflation Comparison between UK and France 1970-2020](Economic-Analysis/DataVisualization_inflation UK France.Rmd)
 
       2. [CO2 emission & GDP Comparison between Germany & Spain 2000-2020](https://github.com/qingxinlii/ECON-Analysis-Visualization-R-/blob/634526d89649439a87f5b1a2618d4c19fb7a2e97/DataVisualization_inflation%20UK%20France.Rmd)
       
